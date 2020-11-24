@@ -57,9 +57,12 @@ class TrainerLGAN():
                 self.optimizer_g.zero_grad()
 
                 fake_segs = self.G(imgs)
+                d_segs_real = self.D(segs)
+                d_segs_fake = self.D(fake_segs)
 
                 segmentation_loss = self.bce(fake_segs, segs)
-                g_loss = segmentation_loss
+                discriminator_loss = torch.abs(d_segs_fake.mean() - d_segs_real.mean())
+                g_loss = segmentation_loss + discriminator_loss
 
                 g_loss.backward()
                 nn.utils.clip_grad_value_(self.G.parameters(), 0.1)
